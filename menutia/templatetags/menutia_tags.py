@@ -3,7 +3,7 @@
 from django import template
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
-from .models import Menu, MenuItem
+from menutia.models import Menu, MenuItem
 
 register = template.Library()
 
@@ -29,17 +29,13 @@ class MenuNode(template.Node):
         return "<MenuNode>"
 
     def render(self,context):
-        try:
-            path = context['request'].path
-        except:
-            path = u''
         lis = []
-        for menu_item in this_menu.items.all():
-            menu_item.selected = menu_item.match(path)
-            li.append(mark_safe( render_to_string("menutia/li.html", {"self": menu_item} ) ) )
+        for menu_item in self.menu.items.all():
+            menu_item.selected = menu_item.match_url(context)
+            lis.append(mark_safe( render_to_string("menutia/li.html", {"self": menu_item, "request": context['request']} ) ) )
 
         context.update({self.varname: lis})
-        output = nodelist.render(context)
+        output = self.nodelist.render(context)
 
         return mark_safe(render_to_string("menutia/ul.html", {"self": self.menu, "content": output}))
 

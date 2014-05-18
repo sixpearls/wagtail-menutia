@@ -13,8 +13,7 @@ from wagtail.wagtailadmin.edit_handlers import FieldPanel, MultiFieldPanel, Inli
 from wagtail.wagtailsnippets.edit_handlers import SnippetChooserPanel
 from wagtail.wagtailsnippets.models import register_snippet
 
-from menutia import settings
-
+import operator
 
 class MenuItem(Orderable):
     menu = ParentalKey('menutia.Menu', related_name="items")
@@ -23,7 +22,7 @@ class MenuItem(Orderable):
     page = models.ForeignKey(Page)
 
     html_li_id = models.CharField(max_length=255, blank=True)
-    match_exact = models.BooleanField(default=True)
+    exact_match = models.BooleanField(default=True)
 
     def __unicode__(self):
         return "%s > %s" % (self.menu.__unicode__(), self.text)
@@ -34,16 +33,22 @@ class MenuItem(Orderable):
         else:
             return unicode.startswith
 
-    def match_url(self,path):
+    def match_url(self,context):
+        path = u''
+        try:
+            path = context['request'].path
+        except:
+            return False
+
         tester = self.get_match_test_function()
-        url = self.get_url
-        return tester(request_url,url)
+        url = self.page.relative_url(context['request'].site)
+        return tester(path,url)
 
     panels = [
         FieldPanel('text'),
         PageChooserPanel('page'),
         FieldPanel('html_li_id'),
-        FieldPanel('match_exact'),
+        FieldPanel('exact_match'),
     ]
 
 class Menu(ClusterableModel):
@@ -53,7 +58,10 @@ class Menu(ClusterableModel):
     html_ul_id = models.CharField(max_length=255, blank=True)
     html_li_selected_class = models.CharField(max_length=255, blank=True, default="selected")
 
-panels = [
+    def __unicode__(self):
+        return self.title
+
+Menu.panels = [
     FieldPanel('title'),
     FieldPanel('html_ul_id'),
     FieldPanel('html_li_selected_class'),
