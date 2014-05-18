@@ -1,0 +1,1 @@
+{% load pageurl %}<li{% if self.selected and self.menu.html_li_selected_class %} class="{{ self.menu.html_li_selected_class }}"{% endif %}{% if self.html_li_id %} id="{{ self.html_li_id }}"{% endif %}><a href="{% pageurl self.page %}">{{ self.text }}</a></li>
