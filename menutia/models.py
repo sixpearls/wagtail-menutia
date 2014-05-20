@@ -22,6 +22,7 @@ class MenuItem(Orderable):
     page = models.ForeignKey(Page)
 
     html_li_id = models.CharField(max_length=255, blank=True)
+    html_li_class = models.CharField(max_length=255, blank=True)
     exact_match = models.BooleanField(default=True)
 
     def __unicode__(self):
@@ -56,6 +57,7 @@ class Menu(ClusterableModel):
         help_text="The title as it will be called from templates")
 
     html_ul_id = models.CharField(max_length=255, blank=True)
+    html_ul_class = models.CharField(max_length=255, blank=True)
     html_li_selected_class = models.CharField(max_length=255, blank=True, default="selected")
 
     def __unicode__(self):
