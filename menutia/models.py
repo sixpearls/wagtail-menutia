@@ -52,6 +52,7 @@ class MenuItem(Orderable):
         FieldPanel('exact_match'),
     ]
 
+@register_snippet
 class Menu(ClusterableModel):
     title = models.CharField(max_length=255, unique=True,
         help_text="The title as it will be called from templates")
@@ -63,12 +64,10 @@ class Menu(ClusterableModel):
     def __unicode__(self):
         return self.title
 
-Menu.panels = [
-    FieldPanel('title'),
-    FieldPanel('html_ul_id'),
-    FieldPanel('html_li_selected_class'),
-    InlinePanel(Menu,'items')
-]
-
-register_snippet(Menu)
+    panels = [
+        FieldPanel('title'),
+        FieldPanel('html_ul_id'),
+        FieldPanel('html_li_selected_class'),
+        InlinePanel('items',label='Menu items')
+    ]
 
