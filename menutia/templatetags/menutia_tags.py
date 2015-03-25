@@ -9,15 +9,19 @@ register = template.Library()
 
 def do_menu(parser, token):
     bits = token.split_contents()[1:]
-    if len(bits) != 3 or bits[1] != 'as':
-        raise template.TemplateSyntaxError('Invalid syntax. Usage: {%% %s <title> as varname %%}')
-    nodelist = parser.parse(('endmenu',))
-    parser.delete_first_token()
+    if len(bits) == 3 and bits[1] == 'as':
+        nodelist = parser.parse(('endmenu',))
+        parser.delete_first_token()
+        context_var = bits[2]
+    elif len(bits) == 1:
+        nodelist = None
+        context_var = ''
+    else:
+        raise template.TemplateSyntaxError('Invalid syntax. Usage: {%% menu <title> %%} or {%% menu <title> as <varname> %%}{%% for <var> in <varname> %%}{{<var>}}{%% endfor %%}{%% endmenu %%}')
 
     this_menu = Menu.objects.get(title=bits[0])
+    return MenuNode(this_menu,context_var,nodelist)
 
-    extra_context = {bits[2]: [ ]}
-    return MenuNode(this_menu,bits[2],nodelist)
 
 class MenuNode(template.Node):
     def __init__(self,menu,varname,nodelist):
@@ -35,8 +39,15 @@ class MenuNode(template.Node):
             lis.append(mark_safe( render_to_string("menutia/li.html", {"self": menu_item, "request": context['request']} ) ) )
 
         context.update({self.varname: lis})
-        output = self.nodelist.render(context)
+        if self.nodelist:
+            output = self.nodelist.render(context)
+        else:
+            output = mark_safe('\n'.join(lis))
 
         return mark_safe(render_to_string("menutia/ul.html", {"self": self.menu, "content": output}))
 
 register.tag('menu', do_menu)
+
+# TODO: ancestors (breadcrumbs) menu
+# TODO: children menu
+# TODO: all tree menu with root, include/exclude types. 
