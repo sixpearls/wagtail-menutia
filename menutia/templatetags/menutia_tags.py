@@ -47,7 +47,3 @@ class MenuNode(template.Node):
         return mark_safe(render_to_string("menutia/ul.html", {"self": self.menu, "content": output}))
 
 register.tag('menu', do_menu)
-
-# TODO: ancestors (breadcrumbs) menu
-# TODO: children menu
-# TODO: all tree menu with root, include/exclude types. 

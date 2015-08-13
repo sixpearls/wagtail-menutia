@@ -3,6 +3,7 @@
 from django.db import models
 from django.conf import settings as site_settings
 from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.encoding import python_2_unicode_compatible
 
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
@@ -25,6 +26,7 @@ class MenuItem(Orderable):
     html_li_class = models.CharField(max_length=255, blank=True)
     exact_match = models.BooleanField(default=True)
 
+    @python_2_unicode_compatible
     def __unicode__(self):
         return "%s > %s" % (self.menu.__unicode__(), self.text)
 
@@ -32,7 +34,7 @@ class MenuItem(Orderable):
         if self.exact_match:
             return operator.__eq__
         else:
-            return unicode.startswith
+            return str.startswith
 
     def match_url(self,context):
         path = u''
@@ -61,7 +63,8 @@ class Menu(ClusterableModel):
     html_ul_class = models.CharField(max_length=255, blank=True)
     html_li_selected_class = models.CharField(max_length=255, blank=True, default="selected")
 
-    def __unicode__(self):
+    @python_2_unicode_compatible
+    def __str__(self):
         return self.title
 
     panels = [
